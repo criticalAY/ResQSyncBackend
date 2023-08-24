@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import {hashPassword, verifyPassword} from "../utils/passwordHashing";
 import jwt from 'jsonwebtoken';
 import {loginInput, signupInput} from "../types/ZodTypes";
+import {sendVerificationMail} from "../middleware/VerifyEmail";
 
 
 // @desc save use to the database if not already present
@@ -18,16 +19,16 @@ export async function signup(req: Request, res: Response): Promise<Response> {
         }
 
         // Check if username is already present, else save
-        const { username, password} = req.body;
-        const isUser = await userModel.findOne({ username });
+        const { email, password} = req.body;
+        if (!process.env.SECRET) return res.status(500);
+        const token = jwt.sign({ email }, process.env.SECRET);
+        const isUser = await userModel.findOne({ email });
         if (isUser) {
             return res.status(401).json({ status: false, msg: 'User already exits!!' });
         } else {
-            const securePassword = hashPassword(password);
-            await userModel.create({ username, securePassword });
+            const securePassword = await hashPassword(password);
+            await sendVerificationMail(email,token,securePassword)
         }
-        if (!process.env.SECRET) return res.status(500);
-        const token = jwt.sign({ username }, process.env.SECRET);
         return res.status(200).json({ status: true, token });
     }
     catch (ex) {
@@ -46,9 +47,8 @@ export async function login(req: Request, res: Response): Promise<Response> {
             });
         }
 
-        // Check if username is present, else invalid
-        const { username, password } = req.body;
-        const user = await userModel.findOne({ username });
+        const { email, password } = req.body;
+        const user = await userModel.findOne({ email });
 
         if (!user) {
             return res.status(401).json({ status: false, msg: 'Invalid Username Or Password' });
@@ -64,8 +64,7 @@ export async function login(req: Request, res: Response): Promise<Response> {
         if (!process.env.SECRET) {
             return res.status(500);
         }
-
-        const token = jwt.sign({ username }, process.env.SECRET);
+        const token = jwt.sign({ email }, process.env.SECRET);
         return res.status(200).json({ status: true, token });
     } catch (ex) {
         console.log(ex);
@@ -83,4 +82,3 @@ export async function me(req: Request, res: Response): Promise<Response> {
         return res.status(500).json({ status: false, msg: 'Internal Server Error!!' });
     }
 }
-

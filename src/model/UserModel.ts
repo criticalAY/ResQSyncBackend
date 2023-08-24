@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
+import {boolean} from "zod";
 
 const userSchema = new mongoose.Schema({
-    username: {
+    email: {
         type: String,
         require: true,
     },

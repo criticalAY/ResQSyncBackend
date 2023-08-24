@@ -17,6 +17,8 @@ const UserModel_1 = __importDefault(require("../model/UserModel"));
 const passwordHashing_1 = require("../utils/passwordHashing");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const ZodTypes_1 = require("../types/ZodTypes");
+const VerifyEmail_1 = require("../middleware/VerifyEmail");
+// import {sendVerificationEmail} from "../auth/transporter";
 // @desc save use to the database if not already present
 function signup(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -30,18 +32,18 @@ function signup(req, res) {
                 });
             }
             // Check if username is already present, else save
-            const { username, password } = req.body;
-            const isUser = yield UserModel_1.default.findOne({ username });
+            const { email, password } = req.body;
+            if (!process.env.SECRET)
+                return res.status(500);
+            const token = jsonwebtoken_1.default.sign({ email }, process.env.SECRET);
+            const isUser = yield UserModel_1.default.findOne({ email });
             if (isUser) {
                 return res.status(401).json({ status: false, msg: 'User already exits!!' });
             }
             else {
-                const securePassword = (0, passwordHashing_1.hashPassword)(password);
-                yield UserModel_1.default.create({ username, securePassword });
+                const securePassword = yield (0, passwordHashing_1.hashPassword)(password);
+                yield (0, VerifyEmail_1.sendVerificationMail)(email, token, securePassword);
             }
-            if (!process.env.SECRET)
-                return res.status(500);
-            const token = jsonwebtoken_1.default.sign({ username }, process.env.SECRET);
             return res.status(200).json({ status: true, token });
         }
         catch (ex) {
@@ -61,9 +63,8 @@ function login(req, res) {
                     msg: 'Invalid Input',
                 });
             }
-            // Check if username is present, else invalid
-            const { username, password } = req.body;
-            const user = yield UserModel_1.default.findOne({ username });
+            const { email, password } = req.body;
+            const user = yield UserModel_1.default.findOne({ email });
             if (!user) {
                 return res.status(401).json({ status: false, msg: 'Invalid Username Or Password' });
             }
@@ -75,7 +76,7 @@ function login(req, res) {
             if (!process.env.SECRET) {
                 return res.status(500);
             }
-            const token = jsonwebtoken_1.default.sign({ username }, process.env.SECRET);
+            const token = jsonwebtoken_1.default.sign({ email }, process.env.SECRET);
             return res.status(200).json({ status: true, token });
         }
         catch (ex) {
@@ -98,3 +99,18 @@ function me(req, res) {
     });
 }
 exports.me = me;
+// export async function verifyEmail(req: Request, res: Response) {
+//     const { token } = req.params;
+//
+//     const user = await userModel.findOneAndUpdate(
+//         { verificationToken: token },
+//         { verificationToken: null, isEmailVerified: true }
+//     );
+//
+//     if (!user) {
+//         return res.status(404).json({ message: 'User not found.' });
+//     }
+//
+//     //res.redirect('/login'); // Redirect to the login page
+//     res.status(200)
+// }
