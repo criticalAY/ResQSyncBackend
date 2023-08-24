@@ -18,7 +18,6 @@ const passwordHashing_1 = require("../utils/passwordHashing");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const ZodTypes_1 = require("../types/ZodTypes");
 const VerifyEmail_1 = require("../middleware/VerifyEmail");
-// import {sendVerificationEmail} from "../auth/transporter";
 // @desc save use to the database if not already present
 function signup(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -99,18 +98,3 @@ function me(req, res) {
     });
 }
 exports.me = me;
-// export async function verifyEmail(req: Request, res: Response) {
-//     const { token } = req.params;
-//
-//     const user = await userModel.findOneAndUpdate(
-//         { verificationToken: token },
-//         { verificationToken: null, isEmailVerified: true }
-//     );
-//
-//     if (!user) {
-//         return res.status(404).json({ message: 'User not found.' });
-//     }
-//
-//     //res.redirect('/login'); // Redirect to the login page
-//     res.status(200)
-// }
