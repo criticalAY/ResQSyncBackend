@@ -17,4 +17,4 @@ jobs:
           chmod 600 keyfile
           mkdir -p ~/.ssh
           cp known_hosts ~/.ssh/known_hosts
-          ssh -t -o StrictHostKeyChecking=no -i keyfile ubuntu@ec2-16-171-78-20.eu-north-1.compute.amazonaws.com "sudo bash ~/deploy.sh"
+          ssh -t -o StrictHostKeyChecking=no -i keyfile ubuntu@ec2-16-171-78-20.eu-north-1.compute.amazonaws.com "sudo bash ~/.github/workflows/deploy.sh"
