@@ -1,4 +1,4 @@
-name: Deploy
+name: kill server
 
 on:
   workflow_dispatch:
