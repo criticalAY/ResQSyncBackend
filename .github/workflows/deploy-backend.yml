@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Add host key to known_hosts
+        run: ssh-keyscan ec2-16-171-78-20.eu-north-1.compute.amazonaws.com >> $HOME/.ssh/known_hosts
       - name: SSH and deploy
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
