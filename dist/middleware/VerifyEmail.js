@@ -77,8 +77,18 @@ function verifyEmail(req, res) {
                 }
             });
             yield UserModel_1.default.create({ email, password });
-            return res.status(200).send(`
- <!DOCTYPE html>
+            return res.status(200).send(htmlRegistrationMessage());
+        }
+        catch (ex) {
+            console.log(ex);
+            return res.status(500).json({ status: false, msg: 'Internal Server Error!!' });
+        }
+    });
+}
+exports.verifyEmail = verifyEmail;
+function htmlRegistrationMessage() {
+    return `
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -125,16 +135,8 @@ function verifyEmail(req, res) {
     </script>
 </div>
 </body>
-</html>
-`);
-        }
-        catch (ex) {
-            console.log(ex);
-            return res.status(500).json({ status: false, msg: 'Internal Server Error!!' });
-        }
-    });
+</html>`;
 }
-exports.verifyEmail = verifyEmail;
 function htmlVerificationMessage(email, token, password) {
     return `
     <html>
