@@ -2,6 +2,6 @@
 .env
 .env.local
 /node_modules/
-*.pem
 ResQSync-key-pair.pem
 *.pem
+.idea/vcs.xml
